@@ -1,4 +1,4 @@
-/*
+/* CABEÇALHO DO EXERCÍCIO
 Nome: Julio Cesario de Paiva Leão
 RA: 1916033
 Turma: Engenharia de Software - ES21
@@ -44,15 +44,47 @@ operações ​de ​leitura ​e ​escrita
 #define CLEAR "clear"
 #endif
 
+// Variáveis globais
+int i;
+
+// Registro de cliente
+typedef struct cliente{
+    char nome[50], rua[50], bairro[50], city[50], tel[12];
+    int age, cep;
+}cliente;
+
+// Funções
+int menu(int *op); // Menu
+void cadastro(cliente *cl, int qtd, int cont); // Cadastrar cliente
+void consulta(cliente *cl, int cont); // Consultar cliente
+void listar(cliente *cl, int cont); // Listar todos os clientes
+
+// Função principal
 int main(){
-    int op;
+    int op, qtd, cont = 0;
+    cliente *cl;
+
+    printf("\n\tINFORME A QUANTIDADE DE CADASTROS: ");
+    scanf("%d", &qtd);
+
+    cl = (cliente*) malloc(qtd * sizeof(cliente));
+
     while(menu(&op) != 8){
         switch(op){
             case 1:
+                if(cont == qtd){
+                    printf("\n\t\aErro! Memoria cheia!\n");
+                    getch();
+                } else {
+                    cadastro(cl, qtd, cont);
+                    cont++;
+                }
                 break;
             case 2:
+                consulta(cl, cont);
                 break;
             case 3:
+                listar(cl, cont);
                 break;
             case 4:
                 break;
@@ -63,20 +95,17 @@ int main(){
             case 7:
                 break;
             case 8:
-                printf("\n\tTHAT'S ALL FOLKS!\n");
                 break;
             default:
-                printf("\n\t\aOpcao invalida\n");
+                printf("\n\t\aOPCAO INVALIDA!\n");
                 getch();
                 break;
         }
-
-
     }
-
     return 0;
 }
 
+// Função Menu
 int menu(int *op){
     system(CLEAR);
     printf("\t<1> Cadastrar Cliente\n");
@@ -92,5 +121,74 @@ int menu(int *op){
     system(CLEAR);
 
     return *op;
+}
 
+// Função cadastro de cliente
+void cadastro(cliente *cl, int qtd, int cont){
+    for(i = cont; i < qtd; i++){
+        printf("Cadastro No %d\n\n", cont+1);
+        fflush(stdin);
+        printf("Informe o Nome: ");
+        fgets(cl[i].nome, 50, stdin);
+        printf("Informe a Idade: ");
+        scanf("%d", &cl[i].age);
+        fflush(stdin);
+        printf("Informe a Rua: ");
+        fgets(cl[i].rua, 50, stdin);
+        printf("Informe o Bairro: ");
+        fgets(cl[i].bairro, 50, stdin);
+        printf("Informe a Cidade: ");
+        fgets(cl[i].city, 50, stdin);
+        printf("Informe o CEP: ");
+        scanf("%d", &cl[i].cep);
+        fflush(stdin);
+        printf("Informe o Telefone: ");
+        fgets(cl[i].tel, 12, stdin);
+        break;
+    }
+}
+
+// Função para consulta
+void consulta(cliente *cl, int cont){
+    char nome[50];
+    fflush(stdin);
+
+    if(cont == 0){
+        printf("\n\t\aNAO HA REGISTROS!\n");
+    } else {
+        printf("Digite um nome para busca: ");
+        fgets(nome, 50, stdin);
+        system(CLEAR);
+        for(i = 0; i < cont; i++){
+            if(strcmp(cl[i].nome, nome) == 0){
+                printf("Nome: %s", cl[i].nome);
+                printf("Idade: %d\n", cl[i].age);
+                printf("Rua: %s", cl[i].rua);
+                printf("Bairro: %s", cl[i].bairro);
+                printf("Cidade: %s", cl[i].city);
+                printf("CEP: %d\n", cl[i].cep);
+                printf("Telefone: %s\n", cl[i].tel);
+            }
+        }
+    }
+    getch();
+}
+
+// Função para listar todos cadastros
+void listar(cliente *cl, int cont){
+
+    if(cont == 0){
+        printf("\n\t\aNAO HA REGISTROS!\n");
+    } else {
+        for(i = 0; i < cont; i++){
+            printf("Nome: %s", cl[i].nome);
+            printf("Idade: %d\n", cl[i].age);
+            printf("Rua: %s", cl[i].rua);
+            printf("Bairro: %s", cl[i].bairro);
+            printf("Cidade: %s", cl[i].city);
+            printf("CEP: %d\n", cl[i].cep);
+            printf("Telefone: %s\n\n", cl[i].tel);
+        }
+    }
+    getch();
 }
