@@ -33,7 +33,6 @@ operações ​de ​leitura ​e ​escrita
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <locale.h>
 
 /**
  * Hack para limpar a tela
@@ -46,7 +45,6 @@ operações ​de ​leitura ​e ​escrita
 #endif
 
 int main(){
-    setlocale(LC_ALL, "Portuguese");
     int op;
     while(menu(&op) != 8){
         switch(op){
@@ -65,6 +63,7 @@ int main(){
             case 7:
                 break;
             case 8:
+                printf("\n\tTHAT'S ALL FOLKS!\n");
                 break;
             default:
                 printf("\n\t\aOpcao invalida\n");
@@ -79,25 +78,19 @@ int main(){
 }
 
 int menu(int *op){
-    setlocale(LC_ALL,"Portuguese");
+    system(CLEAR);
     printf("\t<1> Cadastrar Cliente\n");
     printf("\t<2> Consultar Nome\n");
     printf("\t<3> Listar Todos\n");
     printf("\t<4> Salvar Como Arquivo Texto\n");
     printf("\t<5> Recuperar Arquivo Texto\n");
-    printf("\t<6> Salvar Como Arquivo Binário\n");
-    printf("\t<7> Recuperar Arquivo Binário\n");
+    printf("\t<6> Salvar Como Arquivo Binario\n");
+    printf("\t<7> Recuperar Arquivo Binario\n");
     printf("\t<8> Sair\n");
     printf("\n\tDigite a opcao desejada: ");
-    scanf("%d", *op);
+    scanf("%d", &*op);
+    system(CLEAR);
 
     return *op;
-
-
-
-
-
-
-
 
 }
