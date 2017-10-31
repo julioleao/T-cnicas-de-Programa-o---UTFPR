@@ -46,6 +46,7 @@ operações ​de ​leitura ​e ​escrita
 
 // Variáveis globais
 int i;
+FILE *file;
 
 // Registro de cliente
 typedef struct cliente{
@@ -58,6 +59,11 @@ int menu(int *op); // Menu
 void cadastro(cliente *cl, int qtd, int cont); // Cadastrar cliente
 void consulta(cliente *cl, int cont); // Consultar cliente
 void listar(cliente *cl, int cont); // Listar todos os clientes
+FILE* openTxt(char caminho[30], char modo); // Criar arquivo TXT
+FILE* openBin(char caminho[30], char modo); // Criar arquivo BIN
+int saveTxt(cliente *cl, int cont);
+int saveBin(cliente *cl, int cont);
+void txt(cliente *cl, int *cont);
 
 // Função principal
 int main(){
@@ -87,10 +93,13 @@ int main(){
                 listar(cl, cont);
                 break;
             case 4:
+                saveTxt(cl, cont);
                 break;
             case 5:
+                txt(cl, &cont);
                 break;
             case 6:
+                saveBin(cl, cont);
                 break;
             case 7:
                 break;
@@ -129,21 +138,24 @@ void cadastro(cliente *cl, int qtd, int cont){
         printf("Cadastro No %d\n\n", cont+1);
         fflush(stdin);
         printf("Informe o Nome: ");
-        fgets(cl[i].nome, 50, stdin);
+        scanf("%[^\n]s", cl[i].nome);
         printf("Informe a Idade: ");
-        scanf("%d", &cl[i].age);
+        scanf(" %d", &cl[i].age);
         fflush(stdin);
         printf("Informe a Rua: ");
-        fgets(cl[i].rua, 50, stdin);
+        scanf("%[^\n]s", cl[i].rua);
+        fflush(stdin);
         printf("Informe o Bairro: ");
-        fgets(cl[i].bairro, 50, stdin);
+        scanf("%[^\n]s", cl[i].bairro);
+        fflush(stdin);
         printf("Informe a Cidade: ");
-        fgets(cl[i].city, 50, stdin);
+        scanf("%[^\n]s", cl[i].city);
+        fflush(stdin);
         printf("Informe o CEP: ");
         scanf("%d", &cl[i].cep);
         fflush(stdin);
         printf("Informe o Telefone: ");
-        fgets(cl[i].tel, 12, stdin);
+        scanf("%[^\n]s", cl[i].tel);
         break;
     }
 }
@@ -157,15 +169,15 @@ void consulta(cliente *cl, int cont){
         printf("\n\t\aNAO HA REGISTROS!\n");
     } else {
         printf("Digite um nome para busca: ");
-        fgets(nome, 50, stdin);
+        scanf("%[^\n]s", nome);
         system(CLEAR);
         for(i = 0; i < cont; i++){
             if(strcmp(cl[i].nome, nome) == 0){
-                printf("Nome: %s", cl[i].nome);
+                printf("Nome: %s\n", cl[i].nome);
                 printf("Idade: %d\n", cl[i].age);
-                printf("Rua: %s", cl[i].rua);
-                printf("Bairro: %s", cl[i].bairro);
-                printf("Cidade: %s", cl[i].city);
+                printf("Rua: %s\n", cl[i].rua);
+                printf("Bairro: %s\n", cl[i].bairro);
+                printf("Cidade: %s\n", cl[i].city);
                 printf("CEP: %d\n", cl[i].cep);
                 printf("Telefone: %s\n", cl[i].tel);
             }
@@ -181,14 +193,97 @@ void listar(cliente *cl, int cont){
         printf("\n\t\aNAO HA REGISTROS!\n");
     } else {
         for(i = 0; i < cont; i++){
-            printf("Nome: %s", cl[i].nome);
+            printf("Nome: %s\n", cl[i].nome);
             printf("Idade: %d\n", cl[i].age);
-            printf("Rua: %s", cl[i].rua);
-            printf("Bairro: %s", cl[i].bairro);
-            printf("Cidade: %s", cl[i].city);
+            printf("Rua: %s\n", cl[i].rua);
+            printf("Bairro: %s\n", cl[i].bairro);
+            printf("Cidade: %s\n", cl[i].city);
             printf("CEP: %d\n", cl[i].cep);
             printf("Telefone: %s\n\n", cl[i].tel);
         }
     }
     getch();
+}
+
+int saveTxt(cliente *cl, int cont){
+    if(cont == 0){
+        printf("\n\t\aNAO HA REGISTROS!\n");
+    } else {
+        file = openTxt("cliente.txt", 'a');
+        for(i = 0; i < cont; i++){
+            fscanf(file, "%s %d %s %s %s %d %s\n", cl[i].nome, &cl[i].age, cl[i].rua, cl[i].bairro, cl[i].city, &cl[i].cep, cl[i].tel);
+            fprintf(file, "%s %d %s %s %s %d %s\n", cl[i].nome, cl[i].age, cl[i].rua, cl[i].bairro, cl[i].city, cl[i].cep, cl[i].tel);
+        }
+        fclose(file);
+        printf("\n\t\aARQUIVO TXT SALVO COM SUCESSO!\n");
+    }
+    getch();
+}
+
+void txt(cliente *cl, int *cont){
+    int i = 0;
+    if(cont == 0){
+        printf("\n\t\aNAO HA REGISTROS!\n");
+    } else {
+        file = openTxt("cliente.txt", 'r');
+        while(!feof(file)){
+            fscanf(file, "%s %d %s %s %s %d %s\n", cl[i].nome, &cl[i].age, cl[i].rua, cl[i].bairro, cl[i].city, &cl[i].cep, cl[i].tel);
+            i++;
+            //cl = (cliente*) realloc(cl, i * sizeof(cliente));
+            cont++;
+        }
+        fclose(file);
+        printf("\n\t\aARQUIVO TXT ABERTO COM SUCESSO!\n");
+    }
+    getch();
+}
+
+int saveBin(cliente *cl, int cont){
+    if(cont == 0){
+        printf("\n\t\aNAO HA REGISTROS!\n");
+    } else {
+        file = openBin("cliente.bin", 'a');
+        fwrite (cl, sizeof(cliente), cont, file);
+        fclose(file);
+        printf("\n\t\aARQUIVO BIN SALVO COM SUCESSO!\n");
+    }
+    getch();
+}
+
+FILE* openTxt(char caminho[30], char modo){
+    switch(modo){
+        case 'w':
+            file = fopen(caminho, "w");
+            break;
+        case 'r':
+            file = fopen(caminho, "r");
+            break;
+        case 'a':
+            file = fopen(caminho, "a");
+            break;
+    }
+    if(file == NULL){
+        printf("\n\t\aErro %d - %s\n", errno, strerror(errno));
+        return 0;
+    }
+    return file;
+}
+
+FILE* openBin(char caminho[30], char modo){
+    switch(modo){
+        case 'w':
+            file = fopen(caminho, "wb");
+            break;
+        case 'r':
+            file = fopen(caminho, "rb");
+            break;
+        case 'a':
+            file = fopen(caminho, "ab");
+            break;
+    }
+    if(file == NULL){
+        printf("\n\t\aErro %d - %s\n", errno, strerror(errno));
+        return 0;
+    }
+    return file;
 }
