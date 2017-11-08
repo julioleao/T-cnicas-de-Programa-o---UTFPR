@@ -44,34 +44,36 @@ operações ​de ​leitura ​e ​escrita
 #define CLEAR "clear"
 #endif
 
-// Variáveis globais
-int i;
-FILE *file;
-int cont = 0;
- int j = 0;
-
 // Registro de cliente
 typedef struct cliente{
     char nome[50], rua[50], bairro[50], city[50], tel[12];
     int age, cep;
 }cliente;
 
+// Variáveis globais
+int i;
+FILE *file;
+int cont = 0;
+int j = 0;
+cliente *cl;
+
 // Funções
 int menu(int *op); // Menu
-void cadastro(cliente *cl, int qtd, int cont); // Cadastrar cliente
-void consulta(cliente *cl, int cont); // Consultar cliente
-void listar(cliente *cl, int cont); // Listar todos os clientes
+void cadastro(int qtd); // Cadastrar cliente
+void consulta(); // Consultar cliente
+void listar(); // Listar todos os clientes
 FILE* openTxt(char caminho[30], char modo); // Criar arquivo TXT
 FILE* openBin(char caminho[30], char modo); // Criar arquivo BIN
-int saveTxt(cliente *cl, int cont);
-int saveBin(cliente *cl, int cont);
-void abrirTxt(cliente *cl, int cont, int qtd);
-
+int saveTxt(); // Salvar arquivo TXT
+int saveBin(); // Salvar arquivo BIN
+void abrirTxt(int qtd); // Abrir TXT
+void abrirBin(int qtd); // Abrir BIN
+int tamanho(); // Calcular quantidade de registros em BIN/TXT
 
 // Função principal
 int main(){
     int op, qtd;
-    cliente *cl;
+
 
     printf("\n\tINFORME A QUANTIDADE DE CADASTROS: ");
     scanf("%d", &qtd);
@@ -81,32 +83,31 @@ int main(){
     while(menu(&op) != 8){
         switch(op){
             case 1:
-                if(cont == qtd){
+                if(cont >= qtd){
                     printf("\n\t\aErro! Memoria cheia!\n");
                     getch();
                 } else {
-                    cadastro(cl, qtd, cont);
+                    cadastro(qtd);
                     cont++;
                 }
                 break;
             case 2:
-                consulta(cl, cont);
+                consulta();
                 break;
             case 3:
-                listar(cl, cont);
+                listar();
                 break;
             case 4:
-                saveTxt(cl, cont);
+                saveTxt();
                 break;
             case 5:
-                abrirTxt(cl, cont, qtd);
+                abrirTxt(qtd);
                 break;
             case 6:
-                saveBin(cl, cont);
+                saveBin();
                 break;
             case 7:
-                break;
-            case 8:
+                abrirBin(qtd);
                 break;
             default:
                 printf("\n\t\aOPCAO INVALIDA!\n");
@@ -130,13 +131,17 @@ int menu(int *op){
     printf("\t<8> Sair\n");
     printf("\n\tDigite a opcao desejada: ");
     scanf("%d", &*op);
-    system(CLEAR);
 
+    system(CLEAR);
+    if(*op == 8){
+        printf("\n\t\aATE MAIS JOVEM PADAWAN!\n");
+        free(cl);
+    }
     return *op;
 }
 
 // Função cadastro de cliente
-void cadastro(cliente *cl, int qtd, int cont){
+void cadastro(int qtd){
     for(i = cont; i < qtd; i++){
         printf("Cadastro No %d\n\n", cont+1);
         fflush(stdin);
@@ -164,7 +169,7 @@ void cadastro(cliente *cl, int qtd, int cont){
 }
 
 // Função para consulta
-void consulta(cliente *cl, int cont){
+void consulta(){
     char nome[50];
     fflush(stdin);
 
@@ -204,7 +209,7 @@ void consulta(cliente *cl, int cont){
 }
 
 // Função para listar todos cadastros
-void listar(cliente *cl, int cont){
+void listar(){
 
     if(j == 0 && cont == 0){
         printf("\n\t\aNAO HA REGISTROS!\n");
@@ -233,6 +238,7 @@ void listar(cliente *cl, int cont){
     getch();
 }
 
+// Função para salvar em arquivo TXT
 int saveTxt(cliente *cl, int cont){
     if(cont == 0){
         printf("\n\t\aNAO HA REGISTROS!\n");
@@ -247,39 +253,27 @@ int saveTxt(cliente *cl, int cont){
     getch();
 }
 
-void abrirTxt(cliente *cl, int cont, int qtd){
-   ;
-    char op;
-    if(cont > 0){
-        printf("\n\t\aHA REGISTRO(S) NAO SALVO(S)!\n\tDESEJA SALVA-LO(S) AGORA?\n\n\tS / N: ");
-        op = getche();
-        if(op == 's' || op == 'S'){
-            saveTxt(cl, cont);
-        }
-    }
+// Função para abrir arquivo TXT e gravar na memória
+void abrirTxt(int qtd){
     if(openTxt("cliente.txt", 'r') == NULL){
         printf("\n\t\aNAO HA REGISTROS!\n");
     } else {
         file = openTxt("cliente.txt", 'r');
-        fseek(file, 0, SEEK_END);
-        cl = (cliente*) realloc(cl, (ftell(file)) * sizeof(ftell(file)));
+        cl = (cliente*) realloc(cl, tamanho(cl) * sizeof(cliente)); // Realloc não está rodando
         rewind(file);
-        while((fscanf(file, "%s %d %s %s %s %d %s\n", cl[j].nome, &cl[j].age, cl[j].rua, cl[j].bairro, cl[j].city, &cl[j].cep, cl[j].tel)) != EOF){
-            printf("Nome: %s\n", cl[j].nome);
-            printf("Idade: %d\n", cl[j].age);
-            printf("Rua: %s\n", cl[j].rua);
-            printf("Bairro: %s\n", cl[j].bairro);
-            printf("Cidade: %s\n", cl[j].city);
-            printf("CEP: %d\n", cl[j].cep);
-            printf("Telefone: %s\n\n", cl[j].tel);
+
+        while(!feof(file)){
+            fscanf(file, "%s %d %s %s %s %d %s\n", cl[j].nome, &cl[j].age, cl[j].rua, cl[j].bairro, cl[j].city, &cl[j].cep, cl[j].tel);
             j++;
         }
+        fclose(file);
         printf("\n\t\aARQUIVO TXT ABERTO COM SUCESSO!\n");
     }
     getch();
 }
 
-int saveBin(cliente *cl, int cont){
+// Função para salvar em arquivo BIN
+int saveBin(){
     if(cont == 0){
         printf("\n\t\aNAO HA REGISTROS!\n");
     } else {
@@ -291,6 +285,26 @@ int saveBin(cliente *cl, int cont){
     getch();
 }
 
+// Função para abrir arquivo BIN e gravar na memória
+void abrirBin(int qtd){
+    if(openBin("cliente.bin", 'r') == NULL){
+        printf("\n\t\aNAO HA REGISTROS!\n");
+    } else {
+        file = openBin("cliente.bin", 'r');
+        cl = (cliente*) realloc(cl, tamanho(cl) * sizeof(cliente));
+        rewind(file);
+
+        while(!feof(file)){
+            fscanf(file, "%s %d %s %s %s %d %s\n", cl[j].nome, &cl[j].age, cl[j].rua, cl[j].bairro, cl[j].city, &cl[j].cep, cl[j].tel);
+            j++;
+        }
+        fclose(file);
+        printf("\n\t\aARQUIVO BIN ABERTO COM SUCESSO!\n");
+    }
+    getch();
+}
+
+// Função para abrir arquivo TXT
 FILE* openTxt(char caminho[30], char modo){
     switch(modo){
         case 'w':
@@ -310,6 +324,7 @@ FILE* openTxt(char caminho[30], char modo){
     return file;
 }
 
+// Função para abrir arquivo BIN
 FILE* openBin(char caminho[30], char modo){
     switch(modo){
         case 'w':
@@ -327,4 +342,15 @@ FILE* openBin(char caminho[30], char modo){
         return 0;
     }
     return file;
+}
+
+// Função para contar os registro nos arquivo BIN/TXT
+int tamanho(){
+    int tam = 0;
+    file = openTxt("cliente.txt", 'r');
+    while(fgets(cl->nome, 50, file) != NULL){
+        tam++;
+        cont++;
+    }
+    return tam;
 }
